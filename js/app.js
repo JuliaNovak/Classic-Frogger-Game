@@ -31,10 +31,23 @@ Enemy.prototype.render = function () {
 
 // Now instantiate your Enemy.
 // Place all enemy objects in an array called allEnemies
-let enemy1 = new Enemy(0, 63);
-let enemy2 = new Enemy(-30, 145);
-let enemy3 = new Enemy(-50, 230);
-const allEnemies = [enemy1, enemy2, enemy3];
+
+const generateEnemies = function (numberOfEnemies) {
+   const allEnemies = [];
+   for (let i = 0; i < numberOfEnemies; i++) {
+      const initialPositionX = 0;
+      const initialPositionY = 63;
+      const yDistanceBetwEnemies = 84;
+      allEnemies.push(
+         new Enemy(
+            initialPositionX,
+            initialPositionY + i * yDistanceBetwEnemies
+         )
+      );
+   }
+   return allEnemies;
+};
+const allEnemies = generateEnemies(3);
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -43,62 +56,75 @@ let Player = function (x, y) {
    this.x = x;
    this.y = y;
    this.sprite = "images/char-cat-girl.png";
-   Player.prototype.update = function () {
-      allEnemies.forEach((enemy) => {
-         if (
-            this.x < enemy.x + 80 &&
-            this.x + 80 > enemy.x &&
-            this.y < enemy.y + 60 &&
-            60 + this.y > enemy.y
-         ) {
-            this.x = 200;
-            this.y = 400;
-         }
-      });
-   };
-   Player.prototype.render = function () {
-      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-   };
-   Player.prototype.handleInput = function (key) {
-      switch (key) {
-         case "left":
-            if (this.x > 0) {
-               this.x -= 101;
-               this.render();
-            }
-            break;
-         case "right":
-            if (this.x < y) {
-               this.x += 101;
-               this.render();
-            }
-            break;
-         case "up":
-            if (this.y > 0) {
-               this.y -= 83;
-               this.render();
-            }
-            break;
-         case "down":
-            if (this.y < y) {
-               this.y += 83;
-               this.render();
-            }
-            break;
+};
+
+const calculatePositions = function (data) {
+   allEnemies.forEach((enemy) => {
+      const xCollisionPoint = 80;
+      const yCollisionPoint = 60;
+      if (
+         data.x < enemy.x + xCollisionPoint &&
+         data.x + xCollisionPoint > enemy.x &&
+         data.y < enemy.y + yCollisionPoint &&
+         yCollisionPoint + data.y > enemy.y
+      ) {
+         data.x = 200;
+         data.y = 400;
       }
-      if (this.y < 0) {
-         setTimeout(() => {
-            this.x = x;
-            this.y = y;
+   });
+};
+
+Player.prototype.update = function () {
+   calculatePositions(this);
+};
+
+Player.prototype.render = function () {
+   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Player.prototype.handleInput = function (key) {
+   const xCell = 101;
+   const yCell = 83;
+   switch (key) {
+      case "left":
+         if (this.x > 0) {
+            this.x -= xCell;
             this.render();
-         }, 700);
-      }
-   };
+         }
+         break;
+      case "right":
+         if (this.x < defaultY) {
+            this.x += xCell;
+            this.render();
+         }
+         break;
+      case "up":
+         if (this.y > 0) {
+            this.y -= yCell;
+            this.render();
+         }
+         break;
+      case "down":
+         if (this.y < defaultY) {
+            this.y += yCell;
+            this.render();
+         }
+         break;
+   }
+   if (this.y < 0) {
+      setTimeout(() => {
+         this.x = defaultX;
+         this.y = defaultY;
+         this.render();
+      }, 700);
+   }
 };
 
 // Now instantiate Player.
 // Place the player object in a variable called player
-let player = new Player(200, 400);
+let defaultX = 200;
+let defaultY = 400;
+let player = new Player(defaultX, defaultY);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
